@@ -31,3 +31,29 @@ export const connectForTest = async () => {
     console.error("Error from RabbitMQ", error);
   }
 };
+
+export const consumerQueue = async (channel, queueName) => {
+  try {
+    await channel.assertQueue(queueName, {
+      durable: true /* tiếp tục gửi message khi re-start */,
+    });
+
+    console.log("Waiting for messages...");
+
+    channel.consume(
+      (queueName, msg) => {
+        console.log(`Received message: ${queueName} :`, msg.content.toString());
+        // 1. find User folowing that SHOP
+        // 2. Send message to user
+        // 3. yes, ok --> success
+        // 4. error --> setup DLX
+      },
+      {
+        noAck: true, // lỗi, hệ thống xử lý
+      }
+    );
+  } catch (error) {
+    console.error("error publish message to rabbitMQ:: ", error);
+    throw error;
+  }
+};
